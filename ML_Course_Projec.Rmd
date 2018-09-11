@@ -8,7 +8,10 @@ output: html_document
 # Executive Summary
 
 The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, `classe`.  The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset. 
-**Setup**.  There are several packages we must load in order to conduct this analysis.  The `caret` package utilizes the createDataPartition function to create a series of test/training partitions.  The `randomForest` package allows us to use the randomForest function to build a classification model.  
+
+## Setup
+
+There are several packages we must load in order to conduct this analysis.  The `caret` package utilizes the createDataPartition function to create a series of test/training partitions.  The `randomForest` package allows us to use the randomForest function to build a classification model.  
 ```{r setup, message=FALSE, collapse=TRUE}
 library(caret)
 library(randomForest)

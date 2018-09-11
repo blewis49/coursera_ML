@@ -130,7 +130,10 @@ $(document).ready(function () {
 
 <div id="executive-summary" class="section level1">
 <h1>Executive Summary</h1>
-<p>The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, <code>classe</code>. The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset. <strong>Setup</strong>. There are several packages we must load in order to conduct this analysis. The <code>caret</code> package utilizes the createDataPartition function to create a series of test/training partitions. The <code>randomForest</code> package allows us to use the randomForest function to build a classification model.</p>
+<p>The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, <code>classe</code>. The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>There are several packages we must load in order to conduct this analysis. The <code>caret</code> package utilizes the createDataPartition function to create a series of test/training partitions. The <code>randomForest</code> package allows us to use the randomForest function to build a classification model.</p>
 <pre class="r"><code>library(caret)
 library(randomForest)
 
@@ -141,6 +144,7 @@ download.file(fileurl2, destfile = &quot;testing.csv&quot;, method = &quot;curl&
 
 training &lt;- read.csv(&quot;training.csv&quot;, na.strings = c(&quot;&quot;, &quot;NA&quot;), stringsAsFactors = TRUE)
 testing &lt;- read.csv(&quot;testing.csv&quot;, na.strings = c(&quot;&quot;, &quot;NA&quot;), stringsAsFactors = TRUE)</code></pre>
+</div>
 <div id="exploratory-data-analysis" class="section level2">
 <h2>Exploratory Data Analysis</h2>
 <p><strong>Dealing with missing data</strong>. While checking for missing data, we see that over half of the features (columns) contain NAs. With this much missing data, it’s not wise to attempt to impute values.</p>
