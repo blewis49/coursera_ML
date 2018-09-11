@@ -130,9 +130,8 @@ $(document).ready(function () {
 
 <div id="executive-summary" class="section level1">
 <h1>Executive Summary</h1>
-<p>The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, <code>classe</code>. The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset. ## Setup</p>
-<pre class="r"><code>library(tidyverse)
-library(caret)
+<p>The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, <code>classe</code>. The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset. <strong>Setup</strong>. There are several packages we must load in order to conduct this analysis. The <code>caret</code> package utilizes the createDataPartition function to create a series of test/training partitions. The <code>randomForest</code> package allows us to use the randomForest function to build a classification model.</p>
+<pre class="r"><code>library(caret)
 library(randomForest)
 
 fileurl1 &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
@@ -155,7 +154,8 @@ testing &lt;- testing[,-c(1,3:5)]</code></pre>
 </div>
 <div id="train-the-model" class="section level2">
 <h2>Train the model</h2>
-<p>If we jump directly into training a model with the entire dataset, then we will not have a way to measure the accuracy of the model on a validation set. So before we train the model with the entire training set and use that for a prediction with the test set, let us first train and test a model by splitting the training set into two parts. We’ll use this to determine the accuracy of our model. We will first split the training set so that 75% of the data is in a “train” set and the other 25% is in a “test” set. We build the model on the train set and use the test set to make a prediction. The confusion matrix summarizes our prediction, but we can compute the accuracy by comparing the predictions to the actual observations in the test set and depicting the percentage of correct predictions.</p>
+<p>If we jump directly into training a model with the entire dataset, then we will not have a way to measure the accuracy of the model on a validation set. So before we train the model with the entire training set and use that for a prediction with the test set, let us first train and test a model by splitting the training set into two parts. We’ll use this to determine the accuracy of our model.</p>
+<p>We will first split the training set so that 75% of the data is in a “train” set and the other 25% is in a “test” set. We build the model on the train set and use the test set to make a prediction. The confusion matrix summarizes our prediction, but we can compute the accuracy by comparing the predictions to the actual observations in the test set and depicting the percentage of correct predictions.</p>
 <pre class="r"><code>set.seed(1234)
 trainBuild &lt;- createDataPartition(y = training$classe, p = 0.75, list = FALSE)
 train &lt;- training[trainBuild,]
@@ -173,17 +173,82 @@ modRF$confusion</code></pre>
 <pre><code>## [1] 0.9973491</code></pre>
 <p>Now that we are comfortable with the accuracy of the model, we can train the model using the complete training dataset and the randomForest function.</p>
 <pre class="r"><code>set.seed(2345)
-#modelRF &lt;- randomForest(classe ~., data = training)
-#modelRF$confusion</code></pre>
+modelRF &lt;- randomForest(classe ~., data = training)
+modelRF$confusion</code></pre>
+<pre><code>##      A    B    C    D    E  class.error
+## A 5579    0    0    0    1 0.0001792115
+## B    3 3793    1    0    0 0.0010534633
+## C    0    6 3416    0    0 0.0017533606
+## D    0    0   13 3202    1 0.0043532338
+## E    0    0    0    4 3603 0.0011089548</code></pre>
 <p>Because the factor levels of the <code>new_window</code> variable in the test set are not the same as the same variable in the training set, we must explicitly make the levels the same. We see below the importance of the features in the model and that the factor variable, <code>new_window</code> is lowest of all 56 features. We could have just eliminated this feature before training the model as it does not appear significant.</p>
-<pre class="r"><code># modelRF$importance
-levels(testing$new_window) &lt;- levels(training$new_window)</code></pre>
+<pre class="r"><code>modelRF$importance</code></pre>
+<pre><code>##                      MeanDecreaseGini
+## user_name                 190.0627021
+## new_window                  0.4414688
+## num_window               1314.0474948
+## roll_belt                1131.3032368
+## pitch_belt                657.6335942
+## yaw_belt                  828.2023863
+## total_accel_belt          204.6782362
+## gyros_belt_x               81.6820867
+## gyros_belt_y               98.6349229
+## gyros_belt_z              276.2338846
+## accel_belt_x              110.4730893
+## accel_belt_y              116.5556951
+## accel_belt_z              388.3628100
+## magnet_belt_x             224.6352731
+## magnet_belt_y             341.0579331
+## magnet_belt_z             347.6240105
+## roll_arm                  281.2531833
+## pitch_arm                 163.7499700
+## yaw_arm                   207.6957512
+## total_accel_arm            87.2811769
+## gyros_arm_x               106.7936107
+## gyros_arm_y               109.6159832
+## gyros_arm_z                46.2222504
+## accel_arm_x               228.0754941
+## accel_arm_y               133.3210548
+## accel_arm_z               113.6179423
+## magnet_arm_x              218.5992497
+## magnet_arm_y              203.5167432
+## magnet_arm_z              149.0055085
+## roll_dumbbell             386.4748705
+## pitch_dumbbell            161.2552287
+## yaw_dumbbell              232.6367894
+## total_accel_dumbbell      246.0348114
+## gyros_dumbbell_x          107.5540639
+## gyros_dumbbell_y          217.7356349
+## gyros_dumbbell_z           68.2662323
+## accel_dumbbell_x          240.7225315
+## accel_dumbbell_y          381.1191655
+## accel_dumbbell_z          320.8612894
+## magnet_dumbbell_x         453.5190961
+## magnet_dumbbell_y         640.4279174
+## magnet_dumbbell_z         700.4182280
+## roll_forearm              548.5848657
+## pitch_forearm             723.3111025
+## yaw_forearm               150.2864211
+## total_accel_forearm        89.0157723
+## gyros_forearm_x            61.5315286
+## gyros_forearm_y           103.4404505
+## gyros_forearm_z            65.8090618
+## accel_forearm_x           299.5101354
+## accel_forearm_y           120.4859789
+## accel_forearm_z           211.9951092
+## magnet_forearm_x          195.1993801
+## magnet_forearm_y          185.9593043
+## magnet_forearm_z          239.7689705</code></pre>
+<pre class="r"><code>levels(testing$new_window) &lt;- levels(training$new_window)</code></pre>
 </div>
 <div id="the-prediction." class="section level2">
 <h2>The Prediction.</h2>
 <p>Finally, we use the predict function to classify the 20 observations in the provided testing data set.</p>
-<pre class="r"><code># predictRF &lt;- predict(modelRF, testing)
-# predictRF</code></pre>
+<pre class="r"><code>predictRF &lt;- predict(modelRF, testing)
+predictRF</code></pre>
+<pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E</code></pre>
 <p><strong>Conclusion</strong>. The results displayed above in the <code>predictRF</code> object are the prediction of the classe variable from 20 new observations.</p>
 </div>
 </div>
