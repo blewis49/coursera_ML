@@ -1,0 +1,79 @@
+---
+title: "Machine Learning Course Project"
+author: "William Lewis"
+date: "9/9/2018"
+output: html_document
+---
+
+# Executive Summary
+
+The goal of this analysis is to predict the manner in which a group of health enthusiasts performed certain exercises as measured by the outcome variable, `classe`.  The analysis trains a predictive classification model with random forest and a training dataset to classify the outcome variable into one of 5 groupings, (A,B,C,D,E), using a test dataset. 
+**Setup**.  There are several packages we must load in order to conduct this analysis.
+```{r setup, message=FALSE, collapse=TRUE}
+library(tidyverse)
+library(caret)
+library(randomForest)
+
+fileurl1 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+download.file(fileurl1, destfile = "training.csv", method = "curl")
+fileurl2 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(fileurl2, destfile = "testing.csv", method = "curl")
+
+training <- read.csv("training.csv", na.strings = c("", "NA"), stringsAsFactors = TRUE)
+testing <- read.csv("testing.csv", na.strings = c("", "NA"), stringsAsFactors = TRUE)
+```
+
+## Exploratory Data Analysis
+
+**Dealing with missing data**.  While checking for missing data, we see that over half of the features (columns) contain NAs.  With this much missing data, it's not wise to attempt to impute values.  
+```{r missing_data, results='hide'}
+sapply(training, function(x) sum(is.na(x)))
+sapply(testing, function(x) sum(is.na(x)))
+```
+
+We will rather eliminate the columns that are missing 19,216 values each.  We will also remove the first column which is an index of rows and columns 3-5 which are time stamps. These do not appear to provide a predictive element to the model.
+
+```{r eliminate_data}
+training <- training[,apply(training, 2, function(x) !any(is.na(x)))]
+testing <- testing[,apply(testing, 2, function(x) !any(is.na(x)))]
+training <- training[,-c(1,3:5)]
+testing <- testing[,-c(1,3:5)]
+```
+
+## Train the model
+If we jump directly into training a model with the entire dataset, then we will not have a way to measure the accuracy of the model on a validation set.  So before we train the model with the entire training set and use that for a prediction with the test set, let us first train and test a model by splitting the training set into two parts.  We'll use this to determine the accuracy of our model.
+We will first split the training set so that 75% of the data is in a "train" set and the other 25% is in a "test" set.  We build the model on the train set and use the test set to make a prediction.  The confusion matrix summarizes our prediction, but we can compute the accuracy by comparing the predictions to the actual observations in the test set and depicting the percentage of correct predictions. 
+```{r training}
+set.seed(1234)
+trainBuild <- createDataPartition(y = training$classe, p = 0.75, list = FALSE)
+train <- training[trainBuild,]
+test <- training[-trainBuild,]
+modRF <- randomForest(classe ~., data = train)
+predRF <- predict(modRF, test)
+modRF$confusion
+(accuracy <- sum(predRF == test$classe) / length(predRF))
+```
+
+Now that we are comfortable with the accuracy of the model, we can train the model using the complete training dataset and the randomForest function.  
+
+```{r randomForest}
+set.seed(2345)
+modelRF <- randomForest(classe ~., data = training)
+modelRF$confusion
+```
+
+Because the factor levels of the `new_window` variable in the test set are not the same as the same variable in the training set, we must explicitly make the levels the same.  We see below the importance of the features in the model and that the factor variable, `new_window` is lowest of all 56 features.  We could have just eliminated this feature before training the model as it does not appear significant.  
+
+```{r features}
+modelRF$importance
+levels(testing$new_window) <- levels(training$new_window)
+```
+
+## The Prediction.
+Finally, we use the predict function to classify the 20 observations in the provided testing data set.
+```{r prediction}
+predictRF <- predict(modelRF, testing)
+predictRF
+```
+
+**Conclusion**.  The results displayed above in the `predictRF` object are the prediction of the classe variable from 20 new observations.  
